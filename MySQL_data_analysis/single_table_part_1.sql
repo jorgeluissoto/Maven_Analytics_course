@@ -161,5 +161,68 @@ FROM
 WHERE
     special_features LIKE '%Behind the Scenes%';
 
+-- GROUP BY Example
+SELECT 
+    rating, COUNT(film_id)
+FROM
+    film
+GROUP BY rating;
 
+-- Using Comments & Aliases
+-- STEP 1: pulling all ratings
+SELECT 
+    rating,
+    COUNT(film_id),
+    COUNT(film_id) AS count_of_films_with_this_rating -- single line comment
+FROM
+    film
+GROUP BY rating;
 
+-- Assignment: GROUP BY
+/*I need to get a quick overview of how long our movies tend to be rented out for.
+Could you please pull a count of titles sliced by rental duration.*/
+SELECT 
+    rental_duration,
+    COUNT(film_id) AS films_with_this_rental_duration
+FROM
+    film
+GROUP BY rental_duration;
+
+-- Multiple Dimension GROUP BY Clause
+SELECT 
+    rental_duration,
+    rating,
+    replacement_cost,
+    COUNT(film_id) AS count_of_films
+FROM
+    film
+GROUP BY rental_duration , rating , replacement_cost;
+
+-- Aggregate Functions
+SELECT 
+    rating,
+    COUNT(film_id) AS count_of_films,
+    MIN(length) AS shortest_film,
+    MAX(length) AS longest_film,
+    AVG(length) AS average_length_of_film,
+    SUM(length) AS total_minutes,
+    AVG(rental_duration) AS average_rental_duration
+FROM
+    film
+GROUP BY rating;
+
+-- Assignment: Aggregate Function
+/* I'm wondering if we charge more for rental when the replacement cost is higher.
+Can you help me pull a count of films, along with the average, min, and max rental rate,
+grouped by replacement cost?*/
+SELECT 
+    replacement_cost,
+    COUNT(film_id) AS number_of_films,
+    MIN(rental_rate) AS cheapest_rental,
+    MAX(rental_rate) AS most_expensive_rental,
+    AVG(rental_rate) AS average_rental
+FROM
+    film
+GROUP BY replacement_cost
+ORDER BY average_rental DESC;
+	
