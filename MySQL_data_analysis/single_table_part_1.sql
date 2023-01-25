@@ -223,6 +223,49 @@ SELECT
     AVG(rental_rate) AS average_rental
 FROM
     film
-GROUP BY replacement_cost
-ORDER BY average_rental DESC;
-	
+GROUP BY replacement_cost;
+
+-- HAVING examples
+SELECT 
+    customer_id, COUNT(rental_id) AS total_rentals
+FROM
+    rental
+GROUP BY customer_id
+HAVING COUNT(rental_id) >= 30;
+
+-- Assignment
+/* I'd like to talk to customers that have not rented much from us to understand if there is 
+something we could be doing better.
+Could you pull a list of customer_ids with less than 15 rentals all time?*/
+SELECT 
+    customer_id, COUNT(rental_id) AS total_rentals
+FROM
+    rental
+GROUP BY customer_id
+HAVING COUNT(rental_id) < 15;
+
+-- The ORDER BY clause
+SELECT 
+    customer_id, rental_id, amount, payment_date
+FROM
+    payment
+ORDER BY amount DESC , customer_id;
+
+-- ORDER BY clause
+SELECT 
+    customer_id, 
+    SUM(amount) AS total_payment_amount
+FROM
+    payment
+GROUP BY customer_id
+ORDER BY SUM(amount) DESC;
+
+-- Assignment
+/*I'd like to see if our longest films also tend to be our most expensive rentals.
+Could you pull me a list of all films titles along with the lenghts and rental rates, and sort them from longest
+to shortest*/
+SELECT 
+    title, length, rental_rate
+FROM
+    film
+ORDER BY length DESC;
