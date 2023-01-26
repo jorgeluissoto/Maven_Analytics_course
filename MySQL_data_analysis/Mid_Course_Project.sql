@@ -1,54 +1,43 @@
-use mavenmovies;
-
 /*
 1.	We will need a list of all staff members, including their first and last names, 
 email addresses, and the store identification number where they work. 
 */ 
-
-
-
-
-
-
-
+SELECT 
+    first_name, last_name, email, store_id
+FROM
+    staff;
 
 /*
 2.	We will need separate counts of inventory items held at each of your two stores. 
 */ 
-
-
-
-
-
-
+SELECT 
+    store_id, COUNT(film_id) AS total_films
+FROM
+    inventory
+GROUP BY store_id;
 
 /*
 3.	We will need a count of active customers for each of your stores. Separately, please. 
 */
-
-
-
-
-
-
-
+SELECT store_id,
+	COUNT(customer_id) AS total_customers
+FROM customer
+GROUP BY store_id;
 
 /*
 4.	In order to assess the liability of a data breach, we will need you to provide a count 
 of all customer email addresses stored in the database. 
 */
-
-
-
-
-
+SELECT COUNT(email) AS total_email
+FROM customer;
 
 /*
 5.	We are interested in how diverse your film offering is as a means of understanding how likely 
 you are to keep customers engaged in the future. Please provide a count of unique film titles 
 you have in inventory at each store and then provide a count of the unique categories of films you provide. 
 */
-
+SELECT *
+FROM film;
 
 
 
