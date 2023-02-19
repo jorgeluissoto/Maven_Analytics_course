@@ -130,16 +130,14 @@ Could you please provide a list of advisor and investor names in one table?
 Could you please note whether they are an investor or an advisor, and for the investors, 
 it would be good to include which company they work with. 
 */
-
-
-
-
-
-
-
-
-
-
+SELECT 
+    'advisor' AS type, first_name, last_name, 'N/A'
+FROM
+    advisor 
+UNION SELECT 
+    'investor' AS type, first_name, last_name, company_name
+FROM
+    investor;
 
 /*
 8. We're interested in how well you have covered the most-awarded actors. 
@@ -147,4 +145,21 @@ Of all the actors with three types of awards, for what % of them do we carry a f
 And how about for actors with two types of awards? Same questions. 
 Finally, how about actors with just one award? 
 */
-
+SELECT 
+    CASE
+        WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+        WHEN actor_award.awards IN ('Emmy, Oscar' , 'Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+        ELSE '1 award'
+    END AS number_of_awards,
+    AVG(CASE
+        WHEN actor_award.actor_id IS NULL THEN 0
+        ELSE 1
+    END) AS pct_w_one_film
+FROM
+    actor_award
+GROUP BY CASE
+    WHEN actor_award.awards = 'Emmy, Oscar, Tony ' THEN '3 awards'
+    WHEN actor_award.awards IN ('Emmy, Oscar' , 'Emmy, Tony', 'Oscar, Tony') THEN '2 awards'
+    ELSE '1 award'
+END;
+		
