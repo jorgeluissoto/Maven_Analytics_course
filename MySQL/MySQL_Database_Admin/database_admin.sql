@@ -157,3 +157,23 @@ WHERE
 ROLLBACK;
 
 COMMIT;
+
+-- Primary Keys & Foreign Keys Demo
+USE mavenfuzzyfactorymini;
+
+SELECT 
+    *
+FROM
+    orders_mini;
+
+SELECT 
+    *
+FROM
+    order_items_mini
+WHERE
+    order_id = 9994;-- this is the foreign key, which links to the primary key in orders(order_id)
+
+SELECT 
+    *
+FROM
+    order_item_refunds_mini;
