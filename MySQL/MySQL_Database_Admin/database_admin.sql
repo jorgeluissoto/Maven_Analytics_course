@@ -23,3 +23,137 @@ CREATE TABLE publisher_spend (
 SELECT *
 FROM publisher_spend; 
 
+-- ASSIGNMENT: Adding & Removing Columns
+SELECT 
+    *
+FROM
+    employees;
+
+ALTER TABLE employees
+DROP COLUMN hourly_wage;
+
+ALTER TABLE employees
+ADD COLUMN avg_customer_rating DECIMAL (10,1);
+
+-- ASSIGNMENT: Dropping Schemas & Tables  
+DROP TABLE candy_products;
+
+DROP SCHEMA candystore_old;
+
+-- Inserting Records Into Tables
+USE thiftshop;
+
+SELECT 
+    *
+FROM
+    inventory;
+
+INSERT INTO inventory VALUES
+(10,'wolf skin hat',1);
+
+-- Updating Data Records
+USE thiftshop;
+
+SELECT 
+    *
+FROM
+    inventory;
+
+UPDATE inventory 
+SET 
+    number_in_stock = 0
+WHERE
+    inventory_id IN (1 , 9); 
+
+-- ASSIGNMENT: Inserting & Updating Records
+USE candystore;
+
+SELECT 
+    *
+FROM
+    employees;
+
+INSERT INTO employees VALUES
+(7,'Charles', 'Munger','2020-03-15', 'Clerk', '5.0'),
+(8,'Willam', 'Gates','2020-03-15', 'Clerk', '5.0');
+
+UPDATE employees 
+SET 
+    avg_customer_rating = 4.75
+WHERE
+    employee_id = 5;
+
+ALTER TABLE employees MODIFY avg_customer_rating DECIMAL (10,2);
+
+-- Deleting Specific Records
+USE thriftshop;
+
+SELECT 
+    *
+FROM
+    inventory;
+
+-- return of 1 = on, 0 = off
+SELECT @@autocommit;
+
+SET autocommit = OFF;
+
+DELETE FROM inventory 
+WHERE
+    inventory_id = 7;
+
+-- We turned off auto commit so we are able to rollback to previous commit. 
+ROLLBACK;
+
+-- This statement will make it final and rollback cannot return that deleted record. 
+COMMIT;
+
+-- Deleting All Records with TRUNCATE
+USE thriftshop;
+
+SELECT 
+    *
+FROM
+    customers;
+
+SELECT @@autocommit;
+
+DELETE FROM customers 
+WHERE
+    customer_id BETWEEN 1 AND 6;
+
+ROLLBACK;
+
+-- Even if you run ROLLBACK afte this statement it will not work like with a DELETE statement. 
+TRUNCATE TABLE customers;
+ 
+-- ASSIGNMENT: Deleting Records 
+USE candystore;
+
+SELECT @@autocommit;
+
+SELECT 
+    *
+FROM
+    employees;
+
+DELETE FROM employees 
+WHERE
+    employee_id = 4;
+
+ROLLBACK;
+
+COMMIT;
+
+SELECT 
+    *
+FROM
+    customer_reviews;
+
+DELETE FROM customer_reviews 
+WHERE
+    customer_review_id BETWEEN 1 AND 33;
+
+ROLLBACK;
+
+COMMIT;
