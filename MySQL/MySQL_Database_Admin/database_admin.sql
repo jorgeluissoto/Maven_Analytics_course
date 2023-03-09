@@ -177,3 +177,92 @@ SELECT
     *
 FROM
     order_item_refunds_mini;
+
+-- ASSIGNMENT: Table Relationships 
+/* 1) Tell me what the primary key is, and whether there are any foreign keys
+	2) Explain how the tables relate to each other and what type of relationship exist */
+USE onlinelearningschool;
+
+SELECT 
+    *
+FROM
+    courses;
+-- course_id = primary key
+
+SELECT 
+    *
+FROM
+    course_ratings;
+/* rating_id = primary key
+	course_id = foreign key (courses table) 
+	one - many relationship */
+
+SELECT 
+    *
+FROM
+    course_ratings_summaries;
+/* no primary key in this table.
+	course_id = foreign key 
+    One option here is to add a primary key */
+
+-- Database Normalization Demo
+USE mavenfuzzyfactorymini;
+
+SELECT 
+    *
+FROM
+    website_pageviews_non_normalized
+WHERE
+    website_session_id = 20;
+
+-- CREATE NEW TABLE
+CREATE TABLE website_page_views_normalized SELECT website_pageview_id,
+    created_at,
+    website_session_id,
+    pageview_url FROM
+    website_pageviews_non_normalized;
+
+SELECT 
+    *
+FROM
+    website_page_views_normalized;
+
+-- CREATE NEW TABLE
+CREATE TABLE website_session_normalized
+SELECT DISTINCT -- returns only unique session 
+    website_session_id,
+    session_created_at,
+    user_id,
+    is_repeat_session,
+    utm_source,
+    utm_content,
+    device_type,
+    http_referer
+FROM
+    website_pageviews_non_normalized;
+    
+SELECT 
+    *
+FROM
+    website_session_normalized;
+    
+-- ASSIGNMENT: Normalization
+USE onlinelearningschool;
+
+SELECT 
+    *
+FROM
+    courses;
+
+SELECT 
+    *
+FROM
+    course_ratings;
+-- no need to have course_id and course_name since you could JOIN to the courses table
+ALTER TABLE course_ratings
+DROP COLUMN instructor; -- also dropped course_name 
+
+SELECT 
+    *
+FROM
+    course_ratings_summaries;
