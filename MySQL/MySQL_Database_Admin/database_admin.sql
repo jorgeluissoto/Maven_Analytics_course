@@ -266,3 +266,80 @@ SELECT
     *
 FROM
     course_ratings_summaries;
+
+-- THE UNIQUE CONSTRAINT
+SELECT 
+    *
+FROM
+    inventory;
+
+INSERT INTO inventory VALUES
+(11,'fur coat', 2);
+-- Error Code: 1062. Duplicate entry 'fur coat' for key 'inventory.item_name_UNIQUE'
+
+-- ASSIGNMENT: INDEXES & CONSTRAINTS
+USE sloppyjoes;
+
+SELECT 
+    *
+FROM
+    customer_orders;
+    
+-- make staff_id a foreign key
+-- update null values to zero so we can add non null constraint to order_total
+UPDATE customer_orders
+SET order_total = 0
+WHERE order_id IN (3,8,12,16,19);
+
+SELECT 
+    *
+FROM
+    menu_items;
+-- menu_item_id will be primary key. item_name = unique constraint. price and item_name will be non null 
+
+SELECT 
+    *
+FROM
+    staff;
+-- make staff_id the primary key, make first/ last name / orders served as non null
+
+-- STORED PROCEDURES
+USE thriftshop;
+
+SELECT * FROM inventory;
+
+-- changing the delimiter
+DELIMITER //
+-- creating the procedure
+CREATE PROCEDURE sp_selectallInventory()
+BEGIN
+	SELECT * FROM inventory;
+END //
+-- changing the delimeter back to the default
+DELIMITER ;
+
+-- calling the procedure that we have created
+CALL sp_selectallInventory();
+
+-- if we later want to DROP the procedure, we can use this...
+DROP PROCEDURE sp_selectallInventory;
+
+-- ASSIGNMENT: STORED PROCEDURES 
+USE sloppyjoes;
+
+CALL AllOrders();
+
+DELIMITER //
+CREATE PROCEDURE AllOrders()
+BEGIN
+SELECT staff_id, COUNT(order_id) AS orders_served
+FROM customer_orders
+GROUP BY staff_id;
+END //
+
+DELIMITER ;
+
+-- ASSIGNMENT: TRIGGERS
+-- use this to see 
+
+
