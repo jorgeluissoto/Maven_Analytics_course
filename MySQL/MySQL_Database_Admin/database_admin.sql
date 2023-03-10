@@ -340,6 +340,37 @@ END //
 DELIMITER ;
 
 -- ASSIGNMENT: TRIGGERS
--- use this to see 
+USE sloppyjoes;
+
+-- use this to see # of orders_served before updates
+SELECT 
+    *
+FROM
+    staff;
+SELECT 
+    *
+FROM
+    customer_orders;
+
+-- then, create your trigger
+CREATE 
+    TRIGGER  ordersUpdate
+ AFTER INSERT ON customer_orders FOR EACH ROW 
+    UPDATE staff SET orders_served = orders_served + 1 WHERE
+        staff.staff_id = NEW.staff_id;
+
+-- then, insert these 4 records into customer_orders
+INSERT INTO customer_orders VALUES 
+(21,1,10.98),
+(22,2,5.99),
+(23,2,7.99),
+(24,2,12.97);
+
+-- finally, query the staff table again
+-- if you did this right, orders_served has increased
+SELECT 
+    *
+FROM
+    staff; 
 
 
