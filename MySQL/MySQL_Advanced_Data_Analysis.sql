@@ -83,3 +83,44 @@ FROM
 WHERE
     order_id BETWEEN 31000 AND 32000
 GROUP BY 1;
+
+-- ASSIGNMENT: TRAFFIC SOURCE TRENDING
+/* Based on your conversion rate analysis , we bid down gsearch nonbrand on 2012-04-15.alter
+Can you pull gsearch nonbrand trended session volume, by week, to see if the bid changes have caused volume 
+to drop at all? */
+SELECT 
+    MIN(DATE(created_at)) AS week_start,
+    COUNT(DISTINCT website_session_id) AS sessions
+FROM
+    website_sessions
+WHERE
+    created_at < '2012-05-10'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand'
+GROUP BY WEEK(created_at);
+
+-- You can see a decline in volume after 4/8  
+ 
+-- ASSIGNMENT: BID OPTIMIZATION FOR PAID TRAFFIC
+/*I was trying to use our site on my mobile device the other day, and the experince was not great.
+
+Could you pull conversion rates from session to order, by device type?
+
+If desktop performance is better than on mobile we may be able to bid up for desktop specifically to get more volume? */
+
+SELECT 
+    website_sessions.device_type,
+    COUNT(DISTINCT website_sessions.website_session_id) AS sessions,
+    COUNT(DISTINCT orders.order_id) AS orders,
+    COUNT(DISTINCT orders.order_id) / COUNT(DISTINCT website_sessions.website_session_id) AS session_to_order_conv_rt
+FROM
+    website_sessions
+        LEFT JOIN
+    orders ON orders.website_session_id = website_sessions.website_session_id
+WHERE
+    website_sessions.created_at < '2012-05-11'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand'
+GROUP BY 1;
+
+-- 3.7% conversion on desktop compared to 0.9% on mobile. Increase bids on desktop 
