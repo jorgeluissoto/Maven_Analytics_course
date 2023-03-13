@@ -54,3 +54,32 @@ WHERE
 
 /* Looks like we're below the 4% threshold we need to make the economics work. Based on this analysis, we'll need
 to dial down our serach bids a bit. We're over-spending based on the current conversion rate. */
+
+-- BID OPTIMIZATION & TREND ANALYSIS
+SELECT 
+    YEAR(created_at),
+    WEEK(created_at),
+    MIN(DATE(created_at)) AS week_start,
+    COUNT(DISTINCT website_session_id) AS session
+FROM
+    website_sessions
+WHERE
+    website_session_id BETWEEN 100000 AND 115000
+GROUP BY 1 , 2;
+
+-- PIVOTING DATE WITH COUNT & CASE
+SELECT 
+    primary_product_id,
+    COUNT(DISTINCT CASE
+            WHEN items_purchased = 1 THEN order_id
+            ELSE NULL
+        END) AS count_single_item_orders,
+    COUNT(DISTINCT CASE
+            WHEN items_purchased = 2 THEN order_id
+            ELSE NULL
+        END) AS count_single_items_orders
+FROM
+    orders
+WHERE
+    order_id BETWEEN 31000 AND 32000
+GROUP BY 1;
