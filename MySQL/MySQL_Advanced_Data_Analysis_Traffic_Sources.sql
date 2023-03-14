@@ -1,84 +1,158 @@
--- ANALYZING WEBSITE PERFORMANCE
-
-/* Analyzing Top Website Pages & Entry Pages */
-
--- Top Content Overall 
+-- ANALYZING TOP TRAFFIC SOURCES
 SELECT 
-    pageview_url, COUNT(DISTINCT website_pageview_id) AS pvs
+    website_sessions.utm_content,
+    COUNT(DISTINCT website_sessions.website_session_id) AS sessions,
+    COUNT(DISTINCT orders.order_id) AS orders,
+    COUNT(DISTINCT orders.order_id) / COUNT(DISTINCT website_sessions.website_session_id) AS session_to_order_conv_rt
 FROM
-    website_pageviews
-WHERE
-    website_pageview_id < 1000
-GROUP BY 1
-ORDER BY pvs DESC;
-
--- Creating Temporary Tables
--- Find the first page a user landed on 
-CREATE TEMPORARY TABLE first_pageview
-SELECT 
-    website_session_id,
-    MIN(website_pageview_id) AS min_pv_id
-FROM
-    website_pageviews
-WHERE
-    website_pageview_id < 1000
-GROUP BY 1;
-
--- Use your Temp Tabnle in a Join Statement 
-SELECT 
-    website_pageviews.pageview_url AS landing_page,
-    COUNT(DISTINCT first_pageview.website_session_id) AS sessions_hitting_this_lander
-FROM
-    first_pageview
+    website_sessions
         LEFT JOIN
-    website_pageviews ON first_pageview.min_pv_id = website_pageviews.website_pageview_id
-GROUP BY website_pageviews.pageview_url;
-
--- ASSIGNMENT: Finding Top Website Pages
-/*  Could you help me get my head around the site by pulling the most_viewed website pages, ranked by session volume? */
-
-SELECT 
-    pageview_url,
-    COUNT(DISTINCT website_pageview_id) AS sessions
-FROM
-    website_pageviews
+    orders ON orders.website_session_id = website_sessions.website_session_id
 WHERE
-    created_at < '2012-06-09'
+    website_sessions.website_session_id BETWEEN 1000 AND 2000
 GROUP BY 1
 ORDER BY 2 DESC;
 
-/* It definitely seems like the homepage, the product page, and the Mr.Fuzzy page get the bulk of our traffic. I would 
-like to understand traffic pattern more */ 
+-- ASSIGMENT: FINDING TOP TRAFFIC SOURCES
+/* We've been live for almost a month now and we've starting to generate sales. Can you help me understand where the bulk
+of our website sessions are coming from, through yesterday?
 
--- ASSIGNMENT: FINDING TOP ENTRY PAGES
-/* Would you be able to pull a list of the top entry pages? I want to confirm where our users are hitting the site.
+I'd like to see a breakdown by UTM source, campaign, and referring domain if possible. */
 
-If you could pull all entry pages and rank them on entry volume, that would be great */
-
--- Step1: find the first pageview for each session
--- Step 2: find the url the customer saw on that first pageview
-
-CREATE TEMPORARY TABLE second_pageview
 SELECT 
-    website_session_id,
-    MIN(website_pageview_id) AS min_pv_id
+    utm_source,
+    utm_campaign,
+    http_referer,
+    COUNT(DISTINCT website_session_id) AS number_of_sessions
 FROM
-    website_pageviews
+    website_sessions
 WHERE
-    created_at < '2012-06-12'
+    created_at < '2012-04-12'
+GROUP BY 1 , 2 , 3
+ORDER BY 4 DESC;
+
+-- ASSIGMENT: TRAFFIC SOURCE CONEVRSION RATES
+/* Sounds like gsearch nonbrand is our major traffic source, but we need to understand if those sessions are driving sales.
+
+Could you please calculate the conversion rate (CVR) from session to order? Based on what we're paying for clicks, we'll
+need a CVR of at least 4% to make the numbers work.
+
+If we're much lower, we'll need to reduce bids. If we're higher, we can increase bids to drive more volume. */
+
+SELECT 
+    COUNT(DISTINCT ws.website_session_id) AS sessions,
+    COUNT(DISTINCT o.order_id) AS orders,
+    COUNT(DISTINCT o.order_id) / COUNT(DISTINCT ws.website_session_id) AS session_to_order_conv_rate
+FROM
+    website_sessions ws
+        LEFT JOIN
+    orders o ON o.website_session_id = ws.website_session_id
+WHERE
+    ws.created_at < '2012-04-12'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand';
+
+/* Looks like we're below the 4% threshold we need to make the economics work. Based on this analysis, we'll need
+to dial down our serach bids a bit. We're over-spending based on the current conversion rate. */
+
+-- BID OPTIMIZATION & TREND ANALYSIS
+SELECT 
+    YEAR(created_at),
+    WEEK(created_at),
+    MIN(DATE(created_at)) AS week_start,
+    COUNT(DISTINCT website_session_id) AS session
+FROM
+    website_sessions
+WHERE
+    website_session_id BETWEEN 100000 AND 115000
+GROUP BY 1 , 2;
+
+-- PIVOTING DATE WITH COUNT & CASE
+SELECT 
+    primary_product_id,
+    COUNT(DISTINCT CASE
+            WHEN items_purchased = 1 THEN order_id
+            ELSE NULL
+        END) AS count_single_item_orders,
+    COUNT(DISTINCT CASE
+            WHEN items_purchased = 2 THEN order_id
+            ELSE NULL
+        END) AS count_single_items_orders
+FROM
+    orders
+WHERE
+    order_id BETWEEN 31000 AND 32000
 GROUP BY 1;
 
-SELECT *
-FROM second_pageview;
+-- ASSIGNMENT: TRAFFIC SOURCE TRENDING
+/* Based on your conversion rate analysis , we bid down gsearch nonbrand on 2012-04-15.alter
+Can you pull gsearch nonbrand trended session volume, by week, to see if the bid changes have caused volume 
+to drop at all? */
+SELECT 
+    MIN(DATE(created_at)) AS week_start,
+    COUNT(DISTINCT website_session_id) AS sessions
+FROM
+    website_sessions
+WHERE
+    created_at < '2012-05-10'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand'
+GROUP BY WEEK(created_at);
+
+-- You can see a decline in volume after 4/8  
+ 
+-- ASSIGNMENT: BID OPTIMIZATION FOR PAID TRAFFIC
+/*I was trying to use our site on my mobile device the other day, and the experince was not great.
+
+Could you pull conversion rates from session to order, by device type?
+
+If desktop performance is better than on mobile we may be able to bid up for desktop specifically to get more volume? */
 
 SELECT 
-    website_pageviews.pageview_url AS landing_page,
-    COUNT(DISTINCT second_pageview.website_session_id) AS sessions_hitting_this_landing_page
+    website_sessions.device_type,
+    COUNT(DISTINCT website_sessions.website_session_id) AS sessions,
+    COUNT(DISTINCT orders.order_id) AS orders,
+    COUNT(DISTINCT orders.order_id) / COUNT(DISTINCT website_sessions.website_session_id) AS session_to_order_conv_rt
 FROM
-    second_pageview
+    website_sessions
         LEFT JOIN
-    website_pageviews ON second_pageview.min_pv_id = website_pageviews.website_pageview_id
+    orders ON orders.website_session_id = website_sessions.website_session_id
 WHERE
-    created_at < '2012-06-12'
-GROUP BY website_pageviews.pageview_url;
--- Focus on the home page and improving it 
+    website_sessions.created_at < '2012-05-11'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand'
+GROUP BY 1;
+
+-- 3.7% conversion on desktop compared to 0.9% on mobile. Increase bids on desktop 
+
+-- ASSIGNMENT: Trending w/ Gradular Segments
+/* After your device-level analysis of conversion rates, we realized desktop was doing well, so we bid our gserach
+nonbrand desktop campaigns up on 2012-05-19
+
+Could you pull weekly trends for both desktop and mobile so we can see the impact on volume?
+
+You can use 2012-04-15 until the bid changes as a baseline */
+-- used to see all date limit to 10 
+SELECT *
+FROM website_sessions
+LIMIT 10;
+
+SELECT 
+    MIN(DATE(created_at)) AS week_start,
+    COUNT(DISTINCT CASE
+            WHEN device_type = 'desktop' THEN website_session_id
+            ELSE NULL
+        END) AS dtop_sessions,
+	COUNT(DISTINCT CASE
+            WHEN device_type = 'mobile' THEN website_session_id
+            ELSE NULL
+        END) AS mob_sessions
+FROM
+    website_sessions
+WHERE
+    created_at < '2012-06-09'
+		AND created_at > '2012-04-15'
+        AND utm_source = 'gsearch'
+        AND utm_campaign = 'nonbrand'
+GROUP BY WEEK(created_at);
+-- He did see a pop in desktop sessions after 5/20 
